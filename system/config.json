@@ -1,0 +1,8 @@
+{
+	"thresholds": {
+		"cpu": 80,
+		"ram": 200,
+		"disk": 20,
+		"temp": 70
+	}
+}
