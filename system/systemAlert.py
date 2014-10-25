@@ -31,12 +31,12 @@ class SystemReader:
 		System reader main function to call the others.
 	"""
 	def readSystem(self):
-		
 		results = {}
 		results["CPU"] = self.readCPU()
 		results["RAM"] = self.readRam()
 		results["TEMP"] = self.readTemp()
 		results["DISK"] = self.readDiskSpace()
+		return results
 
 	"""
 		Reads the 15 minute average cpu load
@@ -59,5 +59,39 @@ class SystemReader:
 		ramUsage["free"] = usageLineData[3]
 		return ramUsage
 
+	"""
+		Reads the current temperature.
+	"""
+	def readTemp(self):
+		 return subprocess.check_output(["/bin/awk", '{printf "%3.1f", $1/1000}', "/sys/class/thermal/thermal_zone0/temp"])
+
+	"""
+		Reads the current disk space usage.
+	"""
+	def readDiskSpace(self):
+		output = subprocess.check_output(["/bin/df", "-h"]).split("\n")
+		diskUsage = {}
+		usageLineData = filter(lambda x: x != '', output[1].split(" "))
+		diskUsage["total"] = usageLineData[1][:-1]
+		diskUsage["used"] = usageLineData[2][:-1]
+		diskUsage["free"] = usageLineData[3][:-1]	
+
+	"""
+		Determines the thresholds and creates error messages.
+	"""
+	def determineThresholds(self, thresholds, systemStats):
+		errorMessages = []
+		if systemStats["CPU"] >= thresholds["cpu"]:
+			errorMessages.append("CPU average over the last 15 minutes has met the threshold(" + thresholds["cpu"] + "): " + systemStats["CPU"] + "%")
+		if systemStats["RAM"]["used"] >= thresholds["ram"]:
+			errorMessages.append("Current ram usage is above threshold(" + thresholds["ram"] + "MB): " + systemStats["RAM"]["used"] + "MB / " + systemStats["RAM"]["total"] + "MB. Only " + systemStats["RAM"]["free"] + "MB free")
+		if systemStats["TEMP"] >= thresholds["temp"]:
+			errorMessages.append("Temperature is over threshold(" + thresholds["temp"] + "C): " + systemStats["TEMP"] + "C")
+		if systemStats["DISK"]["used"] >= thresholds["disk"]:
+			errorMessages.append("Current disk usage is above threshold(" + thresholds["disk"] + "GB): " + systemStats["DISK"]["used"] + "GB / " + systemStats["DISK"]["total"] + "GB. Only " + systemStats["DISK"]["free"] + "GB free")
+		
+
 config = FileSystemManager().loadProperties("config.json")
-print(SystemReader().readRam())
+systemReader = SystemReader()
+systemStats = systemReader.readSystem()
+print(systemReader.determineThresholds(config["thresholds"], systemStats))
