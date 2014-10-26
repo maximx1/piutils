@@ -75,21 +75,22 @@ class SystemReader:
 		diskUsage["total"] = usageLineData[1][:-1]
 		diskUsage["used"] = usageLineData[2][:-1]
 		diskUsage["free"] = usageLineData[3][:-1]	
+		return diskUsage
 
 	"""
 		Determines the thresholds and creates error messages.
 	"""
 	def determineThresholds(self, thresholds, systemStats):
 		errorMessages = []
-		if systemStats["CPU"] >= thresholds["cpu"]:
-			errorMessages.append("CPU average over the last 15 minutes has met the threshold(" + thresholds["cpu"] + "): " + systemStats["CPU"] + "%")
-		if systemStats["RAM"]["used"] >= thresholds["ram"]:
-			errorMessages.append("Current ram usage is above threshold(" + thresholds["ram"] + "MB): " + systemStats["RAM"]["used"] + "MB / " + systemStats["RAM"]["total"] + "MB. Only " + systemStats["RAM"]["free"] + "MB free")
-		if systemStats["TEMP"] >= thresholds["temp"]:
-			errorMessages.append("Temperature is over threshold(" + thresholds["temp"] + "C): " + systemStats["TEMP"] + "C")
-		if systemStats["DISK"]["used"] >= thresholds["disk"]:
-			errorMessages.append("Current disk usage is above threshold(" + thresholds["disk"] + "GB): " + systemStats["DISK"]["used"] + "GB / " + systemStats["DISK"]["total"] + "GB. Only " + systemStats["DISK"]["free"] + "GB free")
-		
+		if float(systemStats["CPU"]) >= float(thresholds["cpu"]):
+			errorMessages.append("CPU average over the last 15 minutes has met the threshold(" + str(thresholds["cpu"]) + "%): " + str(systemStats["CPU"]) + "%")
+		if float(systemStats["RAM"]["used"]) >=float( thresholds["ram"]):
+			errorMessages.append("Current ram usage is above threshold(" + str(thresholds["ram"]) + "MB): " + str(systemStats["RAM"]["used"]) + "MB / " + str(systemStats["RAM"]["total"]) + "MB. Only " + str(systemStats["RAM"]["free"]) + "MB free")
+		if float(systemStats["TEMP"]) >= float(thresholds["temp"]):
+			errorMessages.append("Temperature is over threshold(" + str(thresholds["temp"]) + "C): " + str(systemStats["TEMP"]) + "C")
+		if float(systemStats["DISK"]["used"]) >= float(thresholds["disk"]):
+			errorMessages.append("Current disk usage is above threshold(" + str(thresholds["disk"]) + "GB): " + str(systemStats["DISK"]["used"]) + "GB / " + str(systemStats["DISK"]["total"]) + "GB. Only " + str(systemStats["DISK"]["free"]) + "GB free")
+		return errorMessages
 
 config = FileSystemManager().loadProperties("config.json")
 systemReader = SystemReader()
