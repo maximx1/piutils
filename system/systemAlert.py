@@ -102,11 +102,11 @@ class EmailManager:
 	"""
 	def prepareAndSendMail(self, emailData, messages):
 		if len(messages):	
-			header = 'To: ' + ", ".join(emailData["recievers"]) + '\nFrom: ' + email["username"] + '\nMIME-Version: 1.0\nContent-Type: text/html\nSubject: Raspberry Pi Server Warnings\n'
+			header = 'To: ' + ", ".join(emailData["recievers"]) + '\nFrom: ' + emailData["username"] + '\nMIME-Version: 1.0\nContent-Type: text/html\nSubject: Raspberry Pi Server Warnings\n'
 			emailMessage = header + "\n<h1>The following issues are occuring with the pi:</h1><br><br>\n"
 			for message in messages:
 				emailMessage += message + "<br><br>\n"
-			self.sendMail(clientData, emailMessage)
+			self.sendMail(emailData, emailMessage)
 		return False
 	
 	"""
@@ -118,7 +118,7 @@ class EmailManager:
 			server.ehlo()
 			server.starttls()
 			server.ehlo()
-			server.login(clientData["username"], clientData["password"]
+			server.login(clientData["username"], clientData["password"])
 			server.sendmail(clientData["sender"], clientData["recievers"], message)
 			server.close()
 		except smtplib.SMTPException as er:
@@ -129,7 +129,7 @@ class EmailManager:
 config = FileSystemManager().loadProperties("config.json")
 systemReader = SystemReader()
 systemStats = systemReader.readSystem()
-errorMessages = systemReader.determineThresholds(config["thresholds"], systemStats))
+errorMessages = systemReader.determineThresholds(config["thresholds"], systemStats)
 print(errorMessages)
 EmailManager().prepareAndSendMail(config["email"], errorMessages)
 

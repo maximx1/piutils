@@ -4,7 +4,7 @@
 		"ram": 200,
 		"disk": 20,
 		"temp": 70
-	}
+	},
 	"email": {
 		"host": "",
 		"port": 587,
