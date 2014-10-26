@@ -100,9 +100,14 @@ class EmailManager:
 	"""
 		Sends an email out with the error messages.
 	"""
-	def prepareAndSendMail(self, emailData, Messages):
-		header = 'To: ' + recievers + '\nFrom: ' + username + '\nMIME-Version: 1.0\nContent-Type: text/html\nSubject: Raspberry Pi Server Warning\n'
-		message = header + "\nThe following issues are occuring with the pi: <br><br>\n"
+	def prepareAndSendMail(self, emailData, messages):
+		if len(messages):	
+			header = 'To: ' + ", ".join(emailData["recievers"]) + '\nFrom: ' + email["username"] + '\nMIME-Version: 1.0\nContent-Type: text/html\nSubject: Raspberry Pi Server Warnings\n'
+			emailMessage = header + "\n<h1>The following issues are occuring with the pi:</h1><br><br>\n"
+			for message in messages:
+				emailMessage += message + "<br><br>\n"
+			self.sendMail(clientData, emailMessage)
+		return False
 	
 	"""
 		Sends an email out.
@@ -126,5 +131,5 @@ systemReader = SystemReader()
 systemStats = systemReader.readSystem()
 errorMessages = systemReader.determineThresholds(config["thresholds"], systemStats))
 print(errorMessages)
-
+EmailManager().prepareAndSendMail(config["email"], errorMessages)
 
