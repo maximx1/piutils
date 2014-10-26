@@ -9,6 +9,7 @@
 
 import json
 import subprocess
+import smtplib
 
 """
 	Filesystem controller.
@@ -92,7 +93,38 @@ class SystemReader:
 			errorMessages.append("Current disk usage is above threshold(" + str(thresholds["disk"]) + "GB): " + str(systemStats["DISK"]["used"]) + "GB / " + str(systemStats["DISK"]["total"]) + "GB. Only " + str(systemStats["DISK"]["free"]) + "GB free")
 		return errorMessages
 
+"""
+	SMTP email sender.
+"""
+class EmailManager:
+	"""
+		Sends an email out with the error messages.
+	"""
+	def prepareAndSendMail(self, emailData, Messages):
+		header = 'To: ' + recievers + '\nFrom: ' + username + '\nMIME-Version: 1.0\nContent-Type: text/html\nSubject: Raspberry Pi Server Warning\n'
+		message = header + "\nThe following issues are occuring with the pi: <br><br>\n"
+	
+	"""
+		Sends an email out.
+	"""
+	def sendMail(self, clientData, message):
+		try:
+			server = smtplib.SMTP(clientData["host"], clientData["port"])
+			server.ehlo()
+			server.starttls()
+			server.ehlo()
+			server.login(clientData["username"], clientData["password"]
+			server.sendmail(clientData["sender"], clientData["recievers"], message)
+			server.close()
+		except smtplib.SMTPException as er:
+			return False
+		return True
+
+
 config = FileSystemManager().loadProperties("config.json")
 systemReader = SystemReader()
 systemStats = systemReader.readSystem()
-print(systemReader.determineThresholds(config["thresholds"], systemStats))
+errorMessages = systemReader.determineThresholds(config["thresholds"], systemStats))
+print(errorMessages)
+
+
