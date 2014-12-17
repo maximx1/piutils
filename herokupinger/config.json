@@ -1,0 +1,16 @@
+{
+	"settings": {
+		"timeout": 60
+	},
+	"websites": [
+		"google.com",
+	],
+	"email": {
+		"host": "smtp.gmail.com",
+		"port": 587,
+		"username": "",
+		"password": "",
+		"sender": "",
+		"recievers": [""]
+	}
+}
