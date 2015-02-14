@@ -10,6 +10,7 @@
 import json
 import subprocess
 import smtplib
+import locale
 
 """
 	Filesystem controller.
@@ -28,6 +29,12 @@ class FileSystemManager:
 	Main utility to read the system information.
 """
 class SystemReader:
+
+	"""
+		Sets up the object.
+	"""
+	def __init__(self):
+		self.encoding = locale.getdefaultlocale()[1]
 	"""
 		System reader main function to call the others.
 	"""
@@ -43,7 +50,7 @@ class SystemReader:
 		Reads the 15 minute average cpu load
 	"""
 	def readCPU(self):
-		output = subprocess.check_output(["/bin/cat", "/proc/loadavg"])
+		output = subprocess.check_output(["/bin/cat", "/proc/loadavg"]).decode(self.encoding)
 		loadavgs = output.split(" ")
 		return loadavgs[2]
 
@@ -51,11 +58,11 @@ class SystemReader:
 		Reads the current ram usage.
 	"""
 	def readRam(self):
-		output = subprocess.check_output(["/usr/bin/free", "-m"]).split("\n")
+		output = subprocess.check_output(["/usr/bin/free", "-m"]).decode(self.encoding).split("\n")
 		ramUsage = {}
-		usageLineData = filter(lambda x: x != '', output[1].split(" "))
+		usageLineData = list(filter(lambda x: x != '', output[1].split(" ")))
 		ramUsage["total"] = usageLineData[1]
-		usageLineData = filter(lambda x: x != '', output[2].split(" "))
+		usageLineData = list(filter(lambda x: x != '', output[2].split(" ")))
 		ramUsage["used"] = usageLineData[2]
 		ramUsage["free"] = usageLineData[3]
 		return ramUsage
@@ -64,15 +71,15 @@ class SystemReader:
 		Reads the current temperature.
 	"""
 	def readTemp(self):
-		 return subprocess.check_output(["/bin/awk", '{printf "%3.1f", $1/1000}', "/sys/class/thermal/thermal_zone0/temp"])
+		 return subprocess.check_output(["/usr/bin/awk", '{printf "%3.1f", $1/1000}', "/sys/class/thermal/thermal_zone0/temp"]).decode(self.encoding)
 
 	"""
 		Reads the current disk space usage.
 	"""
 	def readDiskSpace(self):
-		output = subprocess.check_output(["/bin/df", "-h"]).split("\n")
+		output = subprocess.check_output(["/bin/df", "-h"]).decode(self.encoding).split("\n")
 		diskUsage = {}
-		usageLineData = filter(lambda x: x != '', output[1].split(" "))
+		usageLineData = list(filter(lambda x: x != '', output[1].split(" ")))
 		diskUsage["total"] = usageLineData[1][:-1]
 		diskUsage["used"] = usageLineData[2][:-1]
 		diskUsage["free"] = usageLineData[3][:-1]	
