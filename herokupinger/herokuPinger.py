@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 """
 	Author: Justin Walrath (walrathjaw@gmail.com)
@@ -9,7 +9,7 @@
 import json
 import subprocess
 import smtplib
-import httplib
+import httplib2
 
 """
 	Filesystem controller.
@@ -63,12 +63,10 @@ class WebsitePinger:
 	def pingWebsites(self, websites):
 		errors = []
 		for website in websites:
-			connection = httplib.HTTPConnection(website)
-			connection.request("GET", "/")
-			response = connection.getresponse()
-			if response.status != 200 && response.status != 303:
+			connection = httplib2.Http(".cache")
+			response, _ = connection.request(website, "GET")
+			if response.status != 200 and response.status != 303:
 				errors.append("Result: (" + website + ", " + str(response.status) + " - " + response.reason + ")")
-			connection.close()
 		return errors
 
 config = FileSystemManager().loadProperties("config.json")
