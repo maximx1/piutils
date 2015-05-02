@@ -7,56 +7,33 @@
 """
 
 import json
-import smtplib
 import httplib2
+from pimailframework.EmailManager import EmailManager
+from pimailframework.containers.MailMan import MailMan
 
-"""
-    Filesystem controller.r
-"""
-class FileSystemManager:
-    """
-        Parses a JSON config file.
-    """
-    def load_properties(self, fileName):
-        data_stream = open(fileName)
-        data = json.load(data_stream)
-        data_stream.close()
-        return data
+def load_json_properties(self, file_name):
+    """loads a json properties file"""
+    data_stream = open(file_name)
+    data = json.load(data_stream)
+    data_stream.close()
+    return data
 
+def send_email_notification(email_data, messages):
+    """Sends out an email alert"""
+    if len(messages):
+        content = "<h1>The following websites returned non-200 status codes:</h1><br><br>"
+        for message in messages:
+            content += message + "<br><br>\n"
 
-"""
-    SMTP email sender.
-"""
-class EmailManager:
-    """
-        Sends an email out with the error messages.
-    """
-    def prepare_and_send_mail(self, email_data, messages):
-        if len(messages):
-            header = 'To: ' + ", ".join(email_data["recievers"]) + '\nFrom: ' + email_data[
-                "username"] + '\nMIME-Version: 1.0\nContent-Type: text/html\nSubject: Raspberry Pi Website Ping errors\n'
-            email_message = header + "\n<h1>The following websites returned non-200 status codes:</h1><br><br>\n"
-            for message in messages:
-                email_message += message + "<br><br>\n"
-            self.send_mail(email_data, email_message)
-        return False
+        mailman = MailMan(email_data["host"], email_data["port"], email_data["username"], email_data["password"])
 
-    """
-        Sends an email out.
-    """
-    def send_mail(self, clientData, message):
-        try:
-            server = smtplib.SMTP(clientData["host"], clientData["port"])
-            server.ehlo()
-            server.starttls()
-            server.ehlo()
-            server.login(clientData["username"], clientData["password"])
-            server.sendmail(clientData["sender"], clientData["recievers"], message)
-            server.close()
-        except smtplib.SMTPException as er:
-            return False
-        return True
-
+        email_manager = EmailManager()
+        envelope = email_manager.prepare_mail(email_data["username"],
+                                              email_data["recievers"],
+                                              "Raspberry Pi Website Ping errors",
+                                              content, mailman)
+        return email_manager.send_mail()
+    return False
 
 """
     Website Pinger
@@ -71,10 +48,8 @@ class WebsitePinger:
                 errors.append("Result: (" + website + ", " + str(response.status) + " - " + response.reason + ")")
         return errors
 
-
-config = FileSystemManager().load_properties("config.json")
-website_pinger = WebsitePinger()
-error_messages = website_pinger.ping_websites(config["websites"])
+config = load_json_properties("config.json")
+error_messages = WebsitePinger().ping_websites(config["websites"])
 print(error_messages)
-EmailManager().prepare_and_send_mail(config["email"], error_messages)
+send_email_notification(config["email"], error_messages)
 
