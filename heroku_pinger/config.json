@@ -3,7 +3,7 @@
 		"timeout": 60
 	},
 	"websites": [
-		"google.com",
+		"https://google.com"
 	],
 	"email": {
 		"host": "smtp.gmail.com",
