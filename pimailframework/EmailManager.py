@@ -4,7 +4,7 @@ from pimailframework.containers.Envelope import Envelope
 class EmailManager:
     """SMTP email sender"""
 
-    _HEADER_TEMPLATE = """To: {}\nFrom: {}\nMIME-Version: 1.0\nContent-Type: text/html\nSubject: {}\n"""
+    _HEADER_TEMPLATE = """To: {}\nFrom: {}\nMIME-Version: 1.0\nContent-Type: text/html\nSubject: {}\n\n"""
 
     def prepare_mail(self, sender, recipients, subject, content, mailman):
         """Prepares the mail"""
