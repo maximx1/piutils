@@ -93,7 +93,7 @@ def send_email_notification(email_data, messages):
     return False
 
 
-def alert(config):
+def alert(config, error_messages):
     EmailManager().prepare_and_send_mail(config["email"], error_messages)
 
 epoch_milli = lambda: int(round(time.time() * 1000))
@@ -108,11 +108,11 @@ else:
     pause_config = file_system_manager.load_pause_data("pause.json")
     system_reader = SystemReader()
     system_stats = system_reader.read_system()
-    error_messages = system_reader.determine_thresholds(app_config["thresholds"], system_stats)
-    print(error_messages)
+    errors = system_reader.determine_thresholds(app_config["thresholds"], system_stats)
+    print(errors)
 
     if pause_config:
         if epoch_milli > int(pause_config["pause_until"]):
-            alert(app_config)
+            alert(app_config, errors)
     else:
-        alert(app_config)
+        alert(app_config, errors)
