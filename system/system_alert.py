@@ -78,7 +78,7 @@ class SystemReader:
 def send_email_notification(email_data, messages):
     """Sends out an email alert"""
     if len(messages):
-        content = "<h1>The following issues are occuring with the pi:</h1><br><br>\n"
+        content = "<h1>The following issues are occurring with the pi:</h1><br><br>\n"
         for message in messages:
             content += message + "<br><br>\n"
 
@@ -86,11 +86,15 @@ def send_email_notification(email_data, messages):
 
         email_manager = EmailManager()
         envelope = email_manager.prepare_mail(email_data["username"],
-                                              email_data["recievers"],
+                                              email_data["receivers"],
                                               "Raspberry Pi Server Warnings",
                                               content, mailman)
         return email_manager.send_mail(envelope)
     return False
+
+
+def alert(config):
+    EmailManager().prepare_and_send_mail(config["email"], error_messages)
 
 epoch_milli = lambda: int(round(time.time() * 1000))
 
@@ -100,18 +104,15 @@ if len(sys.argv) > 1:
         json.dump(new_pause_config, fp)
 else:
     file_system_manager = FileSystemManager()
-    config = file_system_manager.load_properties("config.json")
+    app_config = file_system_manager.load_properties("config.json")
     pause_config = file_system_manager.load_pause_data("pause.json")
     system_reader = SystemReader()
     system_stats = system_reader.read_system()
-    error_messages = system_reader.determine_thresholds(config["thresholds"], system_stats)
+    error_messages = system_reader.determine_thresholds(app_config["thresholds"], system_stats)
     print(error_messages)
-
-    def alert(config):
-        EmailManager().prepare_and_send_mail(config["email"], error_messages)
 
     if pause_config:
         if epoch_milli > int(pause_config["pause_until"]):
-            alert(config)
+            alert(app_config)
     else:
-        alert(config)
+        alert(app_config)

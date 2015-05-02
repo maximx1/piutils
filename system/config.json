@@ -11,6 +11,6 @@
 		"username": "",
 		"password": "",
 		"sender": "",
-		"recievers": [""]
+		"receivers": [""]
 	}
 }
